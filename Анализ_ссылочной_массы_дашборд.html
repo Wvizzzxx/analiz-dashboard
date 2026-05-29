@@ -448,25 +448,49 @@
 
         /* Print / PDF styles */
         @media print {
-            body { background: #fff !important; padding: 0 !important; }
-            .container { max-width: 100% !important; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+            body { background: #fff !important; padding: 10px !important; }
+            .container { max-width: 100% !important; width: 100% !important; }
             .pdf-export-bar { display: none !important; }
-            .section { page-break-inside: avoid; border: 1px solid #e2e8f0 !important; box-shadow: none !important; }
-            .gap-list { page-break-inside: avoid; }
-            .table-wrapper { page-break-inside: avoid; overflow: visible !important; }
-            table { font-size: 11px !important; }
-            thead th, tbody td { padding: 8px 6px !important; }
-            .bar-chart { page-break-inside: avoid; }
-            .conclusion-box { page-break-inside: avoid; }
-            .header { page-break-after: avoid; }
-            .kpi-row { page-break-inside: avoid; }
+            .header { page-break-after: avoid; border-radius: 8px !important; }
             .logo-bar { page-break-after: avoid; }
-            .footer { page-break-before: avoid; }
-            .insight-card { page-break-inside: avoid; }
-            .gap-item { page-break-inside: avoid; }
-            .method-card { page-break-inside: avoid; }
+            .section { border: 1px solid #e2e8f0 !important; box-shadow: none !important; border-radius: 8px !important; padding: 20px !important; margin-bottom: 16px !important; }
+            .kpi-row { page-break-inside: avoid; }
+            .kpi-card { background: #f8fafc !important; }
+            .table-wrapper { overflow: visible !important; border-radius: 8px !important; }
+            table { font-size: 11px !important; width: 100% !important; }
+            thead th { background: #edf2f7 !important; font-size: 11px !important; padding: 8px 6px !important; }
+            tbody td { padding: 6px 6px !important; font-size: 11px !important; }
+            .gap-list { display: block !important; }
+            .gap-item { background: #f8fafc !important; margin-bottom: 10px !important; page-break-inside: avoid; }
+            .gap-item.priority { background: #fff5f5 !important; }
+            .bar-chart { page-break-inside: avoid; }
+            .bar-fill { background: #1a5fb4 !important; color: #fff !important; }
+            .bar-fill.lsr { background: #1a5fb4 !important; }
+            .bar-fill.pik { background: #38a169 !important; }
+            .bar-fill.etalon { background: #d69e2e !important; }
+            .bar-fill.samolet { background: #d53f8c !important; }
+            .bar-fill.setl { background: #9f7aea !important; }
+            .bar-track { background: #edf2f7 !important; }
+            .row-lsr { background: #ebf5ff !important; }
+            .badge-red { background: #fff5f5 !important; color: #e53e3e !important; border-color: #feb2b2 !important; }
+            .badge-yellow { background: #fffff0 !important; color: #d69e2e !important; border-color: #fefcbf !important; }
+            .badge-green { background: #f0fff4 !important; color: #38a169 !important; border-color: #c6f6d5 !important; }
+            .badge-blue { background: #ebf8ff !important; color: #3182ce !important; border-color: #bee3f8 !important; }
+            .best { color: #38a169 !important; }
+            .worst { color: #e53e3e !important; }
+            .middle { color: #d69e2e !important; }
+            .insight-card { page-break-inside: avoid; background: #f0f4ff !important; border: 1px solid #d6e0f0 !important; }
+            .conclusion-box { page-break-inside: avoid; background: #f0fff4 !important; border: 1px solid #c6f6d5 !important; }
+            .goal-box { background: #ebf5ff !important; border-left: 4px solid #1a5fb4 !important; }
+            .method-card { page-break-inside: avoid; background: #f8fafc !important; }
             .priority-item { page-break-inside: avoid; }
-            @page { margin: 12mm; size: A4 portrait; }
+            .priority-num { background: #276749 !important; color: #fff !important; }
+            .footer { page-break-before: avoid; background: #1a2a3a !important; border-radius: 8px !important; }
+            .kpi-card.warn { background: #fff5f5 !important; border-color: #e53e3e !important; }
+            .kpi-card.ok { background: #f0fff4 !important; border-color: #38a169 !important; }
+            .kpi-card.caution { background: #fffff0 !important; border-color: #d69e2e !important; }
+            @page { margin: 10mm; size: A4 portrait; }
         }
     </style>
 </head>
