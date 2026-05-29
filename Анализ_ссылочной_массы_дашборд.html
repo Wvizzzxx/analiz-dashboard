@@ -551,7 +551,7 @@
                 <div class="text">
                     Провести комплексный сравнительный анализ ссылочных профилей сайта <strong>www.lsr.ru</strong> и 4 ключевых конкурентов
                     (<strong>ПИК (pik.ru), Эталон (etalongroup.ru), Самолёт (samolet.ru), СЕТЛ Груп (setlgroup.ru)</strong>)
-                    для выявления слабые стороны, где LSR отстаёт по количеству, качеству и типам referring domains,
+                    для выявления слабых сторон, где LSR отстаёт по количеству, качеству и типам referring domains,
                     а также определить приоритеты для укрепления ссылочного профиля с учётом требований <strong>GEO (Generative Engine Optimization)</strong> —
                    современного подхода к оптимизации, ориентированного на то, как AI-модели (ChatGPT, Perplexity, Gemini) «видят» и рекомендуют бренд.
                 </div>
@@ -637,7 +637,7 @@
             <div class="insight-card">
                 <div class="insight-title">Краткий вывод</div>
                 <div class="insight-text">
-                    LSR имеет <strong>самое качественное ядро ссылочного профиля</strong> (лидер по среднему и медианному DR), нозначительно отстаёт по объёму (851 vs 1000+ у конкурентов) и количеству авторитетных доменов (53 vs 96 у ПИК). Это значит, что «ядро» профиля сильное, но нужно расширять охват.
+                    LSR имеет <strong>самое качественное ядро ссылочного профиля</strong> (лидер по среднему и медианному DR), но значительно отстаёт по объёму (851 vs 1000+ у конкурентов) и количеству авторитетных доменов (53 vs 96 у ПИК). Это значит, что «ядро» профиля сильное, но нужно расширять охват.
                 </div>
             </div>
         </div>
@@ -858,7 +858,7 @@
                 </table>
             </div>
             <div class="text" style="margin-top:12px;">
-                <strong>Вывод:</strong> LSR лидирует по агрегаторам (14) и государственным площадкам (9), нозначительно отстаёт по форумам (4 vs 11 у Самолёта) и обзорным/рейтинговым сайтам (11 vs 24 у Самолёта). Именно эти две категории критичны для GEO, поскольку AI-модели активно анализируют форумы и обзоры при формировании рекомендаций.
+                <strong>Вывод:</strong> LSR лидирует по агрегаторам (14) и государственным площадкам (9), но значительно отстаёт по форумам (4 vs 11 у Самолёта) и обзорным/рейтинговым сайтам (11 vs 24 у Самолёта). Именно эти две категории критичны для GEO, поскольку AI-модели активно анализируют форумы и обзоры при формировании рекомендаций.
             </div>
         </div>
 
@@ -893,7 +893,7 @@
                 </div>
             </div>
 
-            <h3 style="margin-top:24px;">Детализация слабые стороны</h3>
+            <h3 style="margin-top:24px;">Детализация слабых сторон</h3>
             <div class="gap-list">
                 <div class="gap-item priority">
                     <div class="gap-name">Авторитетные домены (DR ≥ 70): 53 vs 96 у ПИК</div>
@@ -957,7 +957,7 @@
                 </div>
                 <div class="gap-item">
                     <div class="gap-name">Форумы и комьюнити: pikabu, vc.ru, dzen.ru</div>
-                    <div class="gap-desc">У Самолёта 11 referring domains из этой категории — это обсуждения, мнения реальных покупателей. AI-модели активно используют such «человеческие» данные.</div>
+                    <div class="gap-desc">У Самолёта 11 referring domains из этой категории — это обсуждения, мнения реальных покупателей. AI-модели активно активно анализируют такие «человеческие» данные.</div>
                     <br><span class="badge badge-blue">ВОЗМОЖНОСТЬ</span>
                 </div>
             </div>
@@ -1125,7 +1125,80 @@
             </div>
         </div>
 
-        <!-- 10. ВЫВОДЫ -->
+        <!-- 10. SPAM ANALYSIS -->
+        <div class="section">
+            <h2>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                Спамные ссылки
+            </h2>
+            <div class="text">Анализ спамных referring domains по данным Ahrefs «Is spam»:</div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Сайт</th>
+                            <th>Всего RD</th>
+                            <th>Спам</th>
+                            <th>% спама</th>
+                            <th>Чистых</th>
+                            <th>% чистых</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="row-lsr">
+                            <td>LSR</td>
+                            <td>851</td>
+                            <td>294</td>
+                            <td class="middle">34.5%</td>
+                            <td>557</td>
+                            <td class="best">65.5%</td>
+                        </tr>
+                        <tr>
+                            <td>ПИК</td>
+                            <td>1 008</td>
+                            <td>366</td>
+                            <td>36.3%</td>
+                            <td>642</td>
+                            <td>63.7%</td>
+                        </tr>
+                        <tr>
+                            <td>Эталон</td>
+                            <td>1 037</td>
+                            <td class="worst">574</td>
+                            <td class="worst">55.4%</td>
+                            <td class="worst">463</td>
+                            <td class="worst">44.6%</td>
+                        </tr>
+                        <tr>
+                            <td>Самолёт</td>
+                            <td>971</td>
+                            <td>306</td>
+                            <td class="best">31.5%</td>
+                            <td class="best">665</td>
+                            <td class="best">68.5%</td>
+                        </tr>
+                        <tr>
+                            <td>СЕТЛ</td>
+                            <td>310</td>
+                            <td>109</td>
+                            <td>35.2%</td>
+                            <td>201</td>
+                            <td>64.8%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="insight-card" style="margin-top:16px;">
+                <div class="insight-title">Выводы по спаму</div>
+                <div class="insight-text">
+                    <strong>LSR имеет 294 спамных домена из 851 (34.5%)</strong> — это второй лучший показатель после Самолёта (31.5%). Эталон значительно хуже — 55.4% спамных доменов.<br><br>
+                    <strong>Типичные спамные домены:</strong> directoryoflink.com, topbilliondirectory.com, heavenarticle.com, webscountry.com, linkodirectory.com — это SEO-каталоги и сайты с автоматически сгенерированным контентом.<br><br>
+                    <strong>Рекомендация:</strong> Отправить disavow-файл в Google Search Console для 294 спамных доменов. Это не повлияет на позиции, но защитит от потенциальных санкций за спамные ссылки.
+                </div>
+            </div>
+        </div>
+
+        <!-- 11. ВЫВОДЫ -->
         <div class="section">
             <h2>
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#276749" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
@@ -1135,7 +1208,7 @@
             <div class="insight-card">
                 <div class="insight-title">Общая оценка</div>
                 <div class="insight-text">
-                    LSR имеет <strong>самый качественный ссылочный профиль</strong> среди конкурентов (средний DR 27.8, медианный 26 — лучшие показатели), нозначительно отстаёт по <strong>объёму</strong> (851 RD vs 1000+ у трёх конкурентов) и <strong>разнообразию типов площадок</strong>. Критические пробелы: недостаток ссылок с крупных СМИ (ria.ru, lenta.ru), IT-платформ (habr.com) и низкая доля брендовых анкоров (36.7% vs 72.3% у ПИК). При этом LSR <strong>лидирует</strong> по обзорным и рейтинговым площадкам (95 упоминаний), что является сильной базой для GEO.
+                    LSR имеет <strong>самый качественный ссылочный профиль</strong> среди конкурентов (средний DR 27.8, медианный 26 — лучшие показатели), но значительно отстаёт по <strong>объёму</strong> (851 RD vs 1000+ у трёх конкурентов) и <strong>разнообразию типов площадок</strong>. Критические пробелы: недостаток ссылок с крупных СМИ (ria.ru, lenta.ru), IT-платформ (habr.com) и низкая доля брендовых анкоров (36.7% vs 72.3% у ПИК). При этом LSR <strong>лидирует</strong> по обзорным и рейтинговым площадкам (95 упоминаний), что является сильной базой для GEO.
                 </div>
             </div>
 
