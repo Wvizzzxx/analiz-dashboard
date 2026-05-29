@@ -397,48 +397,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* PDF Export Button */
-        .pdf-export-bar {
-            text-align: center;
-            margin: 24px 0;
-        }
-        .pdf-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 14px 32px;
-            font-size: 16px;
-            font-weight: 700;
-            color: #fff;
-            background: linear-gradient(135deg, #1a5fb4 0%, #3584e4 100%);
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(26,95,180,0.3);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .pdf-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(26,95,180,0.4);
-        }
-        .pdf-btn:active { transform: translateY(0); }
-        .pdf-btn:disabled {
-            opacity: 0.7;
-            cursor: wait;
-            transform: none;
-        }
-        .pdf-btn svg { flex-shrink: 0; }
-        .pdf-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
+         }
 
         @media (max-width: 768px) {
             .kpi-row { grid-template-columns: repeat(2, 1fr); }
@@ -451,7 +410,6 @@
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
             body { background: #fff !important; padding: 0 !important; margin: 0 !important; }
             .container { max-width: 100% !important; width: 100% !important; padding: 0 !important; }
-            .pdf-export-bar { display: none !important; }
             .header { border-radius: 8px !important; padding: 24px !important; margin-bottom: 16px !important; }
             .header h1 { font-size: 22px !important; }
             .header .subtitle { font-size: 13px !important; }
@@ -1289,19 +1247,7 @@
             </div>
         </div>
 
-        <!-- PDF EXPORT BUTTON -->
-        <div class="pdf-export-bar" id="pdfExportBar">
-            <button class="pdf-btn" id="pdfBtn" onclick="exportPDF()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                    <polyline points="7 10 12 15 17 10"/>
-                    <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
-                Скачать PDF
-            </button>
-        </div>
-
-        <!-- FOOTER -->
+                <!-- FOOTER -->
         <div class="footer" style="page-break-inside:avoid;">
             <div class="footer-divider"></div>
             <div class="footer-text">
@@ -1314,12 +1260,6 @@
 
     </div>
 
-    <!-- html2pdf.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script>
-        function exportPDF() {
-            window.print();
-        }
-    </script>
+        
 </body>
 </html>
