@@ -445,6 +445,13 @@
             .gap-list { grid-template-columns: 1fr; }
             .method-grid { grid-template-columns: 1fr; }
         }
+
+        /* PDF page break helpers */
+        .section { page-break-inside: avoid; }
+        .gap-list { page-break-inside: avoid; }
+        .table-wrapper { page-break-inside: avoid; }
+        .bar-chart { page-break-inside: avoid; }
+        .conclusion-box { page-break-inside: avoid; }
     </style>
 </head>
 <body>
@@ -1197,28 +1204,39 @@
     <script>
         function exportPDF() {
             var btn = document.getElementById('pdfBtn');
-            var bar = document.getElementById('pdfExportBar');
             btn.disabled = true;
-            btn.innerHTML = '<span class="pdf-spinner"></span> Генерация PDF...';
+            btn.innerHTML = '<span class="pdf-spinner"></span> Generating PDF...';
 
             var element = document.querySelector('.container');
 
+            // Temporarily set white background for PDF
+            var oldBg = document.body.style.background;
+            var oldBodyBg = window.getComputedStyle(document.body).backgroundColor;
+            document.body.style.background = '#ffffff';
+
             var opt = {
-                margin:       [10, 10, 10, 10],
-                filename:     'Анализ_ссылочной_массы_дашборд.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                margin:       [8, 8, 8, 8],
+                filename:     'Link_Analysis_Dashboard.pdf',
+                image:        { type: 'jpeg', quality: 0.95 },
+                html2canvas:  {
+                    scale: 1.5,
+                    useCORS: true,
+                    letterRendering: true,
+                    backgroundColor: '#ffffff',
+                    windowWidth: 1200
+                },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'], before: '.section' }
             };
 
             html2pdf().set(opt).from(element).save().then(function() {
+                document.body.style.background = oldBg;
                 btn.disabled = false;
-                btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Скачать PDF';
+                btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF';
             }).catch(function(err) {
-                alert('Ошибка: ' + err);
+                document.body.style.background = oldBg;
                 btn.disabled = false;
-                btn.innerHTML = 'Скачать PDF';
+                btn.innerHTML = 'Download PDF';
             });
         }
     </script>
