@@ -20,3 +20,12 @@ cf_out.txt
 cf2_err.txt
 sshrun.txt
 sshrun_err.txt
+launch_log.txt
+ngrok_log.txt
+
+# Data / notes
+*.xlsx
+impulse-ui-kit/
+все данные с выгрузок/
+что нужно сделать.txt
+что выполненно по задаче.txt
