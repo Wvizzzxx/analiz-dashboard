@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Старые туннели и утилиты
+ngrok-bin/
+ngrok.zip
+cloudflared.exe
+*.log
+
+# Системные файлы
+Thumbs.db
+.DS_Store
+
+# Временные файлы
+_netlify_deploy/
+cf_err.txt
+cf_out.txt
+cf2_err.txt
+sshrun.txt
+sshrun_err.txt

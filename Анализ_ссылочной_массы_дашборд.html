@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анализ ссылочной массы — LSR vs Конкуренты</title>
+    <link rel="stylesheet" href="impulse-ui-kit/css/impulse-ui-kit.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #1a2a3a;
+            line-height: 1.7;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* Logo header */
+        .logo-bar {
+            background: #fff;
+            border-radius: 14px;
+            padding: 18px 32px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo-bar svg { height: 24px; width: auto; }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a5fb4 0%, #3584e4 100%);
+            border-radius: 16px;
+            padding: 48px 40px;
+            margin-bottom: 28px;
+            color: #fff;
+        }
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header h1 svg { width: 36px; height: 36px; flex-shrink: 0; }
+        .header h1 svg path, .header h1 svg circle, .header h1 svg polyline, .header h1 svg line { stroke: #fff; }
+        .header .subtitle {
+            font-size: 17px;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 20px;
+            max-width: 800px;
+        }
+        .header .date {
+            font-size: 13px;
+            color: rgba(255,255,255,0.65);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .header .date svg { width: 16px; height: 16px; }
+        .header .date svg path, .header .date svg rect, .header .date svg line { stroke: rgba(255,255,255,0.65); }
+
+        /* Section */
+        .section {
+            background: #fff;
+            border-radius: 14px;
+            padding: 32px;
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .section h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a5fb4;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section h2 svg { width: 26px; height: 26px; flex-shrink: 0; }
+        .section h2 svg path, .section h2 svg circle, .section h2 svg polyline, .section h2 svg line, .section h2 svg rect { stroke: #1a5fb4; }
+        .section h3 {
+            font-size: 16px;
+            color: #2d3748;
+            margin: 18px 0 12px 0;
+            font-weight: 600;
+        }
+
+        .text { font-size: 14px; color: #4a5568; margin-bottom: 12px; line-height: 1.7; }
+        .text strong { color: #1a2a3a; }
+
+        .goal-box {
+            background: linear-gradient(135deg, #ebf5ff 0%, #f0f7ff 100%);
+            border-left: 4px solid #1a5fb4;
+            border-radius: 8px;
+            padding: 22px 26px;
+            margin: 16px 0;
+        }
+        .goal-box .goal-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #1a5fb4;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        /* KPI Cards */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .kpi-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 22px 16px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+        .kpi-card .kpi-label {
+            font-size: 11px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .kpi-card .kpi-value {
+            font-size: 34px;
+            font-weight: 800;
+            color: #1a5fb4;
+        }
+        .kpi-card .kpi-sub {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-top: 6px;
+        }
+        .kpi-card.warn { border-color: #e53e3e; background: #fff5f5; }
+        .kpi-card.warn .kpi-value { color: #e53e3e; }
+        .kpi-card.ok { border-color: #38a169; background: #f0fff4; }
+        .kpi-card.ok .kpi-value { color: #38a169; }
+        .kpi-card.caution { border-color: #d69e2e; background: #fffff0; }
+        .kpi-card.caution .kpi-value { color: #d69e2e; }
+
+        /* Table */
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 16px 0;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        thead th {
+            background: #edf2f7;
+            color: #2d3748;
+            padding: 13px 14px;
+            text-align: center;
+            font-weight: 700;
+            white-space: nowrap;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 13px;
+        }
+        thead th:first-child { text-align: left; }
+        tbody td {
+            padding: 11px 14px;
+            text-align: center;
+            border-bottom: 1px solid #edf2f7;
+            color: #4a5568;
+        }
+        tbody td:first-child { text-align: left; font-weight: 500; color: #2d3748; }
+        tbody tr:hover { background: #f7fafc; }
+        .row-lsr { background: #ebf5ff !important; }
+        .row-lsr td { color: #1a2a3a; font-weight: 600; }
+        .best { color: #38a169 !important; font-weight: 700; }
+        .worst { color: #e53e3e !important; font-weight: 600; }
+        .middle { color: #d69e2e !important; font-weight: 600; }
+
+        /* Gap list */
+        .gap-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin: 14px 0;
+        }
+        .gap-item {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 16px 20px;
+            border-left: 4px solid #e53e3e;
+        }
+        .gap-item.priority {
+            border-left-color: #c53030;
+            background: #fff5f5;
+        }
+        .gap-item .gap-name {
+            font-weight: 700;
+            color: #1a2a3a;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        .gap-item .gap-desc {
+            font-size: 12px;
+            color: #718096;
+            margin-top: 4px;
+            line-height: 1.6;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .badge-red { background: #fff5f5; color: #e53e3e; border: 1px solid #feb2b2; }
+        .badge-yellow { background: #fffff0; color: #d69e2e; border: 1px solid #fefcbf; }
+        .badge-green { background: #f0fff4; color: #38a169; border: 1px solid #c6f6d5; }
+        .badge-blue { background: #ebf8ff; color: #3182ce; border: 1px solid #bee3f8; }
+
+        /* Insight */
+        .insight-card {
+            background: linear-gradient(135deg, #f0f4ff 0%, #f5f7ff 100%);
+            border: 1px solid #d6e0f0;
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin: 12px 0;
+        }
+        .insight-card .insight-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1a5fb4;
+            margin-bottom: 8px;
+        }
+        .insight-card .insight-text {
+            font-size: 14px;
+            color: #4a5568;
+            line-height: 1.7;
+        }
+
+        /* Bar chart */
+        .bar-chart { margin: 14px 0; }
+        .bar-row {
+            display: flex;
+            align-items: center;
+            margin: 7px 0;
+            gap: 10px;
+        }
+        .bar-label {
+            width: 120px;
+            font-size: 13px;
+            color: #4a5568;
+            text-align: right;
+            flex-shrink: 0;
+            font-weight: 500;
+        }
+        .bar-track {
+            flex: 1;
+            height: 28px;
+            background: #edf2f7;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .bar-fill.lsr { background: linear-gradient(90deg, #1a5fb4, #3584e4); }
+        .bar-fill.pik { background: linear-gradient(90deg, #2d8659, #38a169); }
+        .bar-fill.etalon { background: linear-gradient(90deg, #b7791f, #d69e2e); }
+        .bar-fill.samolet { background: linear-gradient(90deg, #9b2c5e, #d53f8c); }
+        .bar-fill.setl { background: linear-gradient(90deg, #6b46c1, #9f7aea); }
+
+        /* Method */
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 16px 0;
+        }
+        .method-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+        }
+        .method-card .method-num {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1a5fb4;
+            margin-bottom: 8px;
+        }
+        .method-card .method-title {
+            font-size: 14px;
+            color: #1a2a3a;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .method-card .method-desc {
+            font-size: 12px;
+            color: #718096;
+            line-height: 1.6;
+        }
+
+        /* Conclusion */
+        .conclusion-box {
+            background: linear-gradient(135deg, #f0fff4 0%, #e6ffed 100%);
+            border: 1px solid #c6f6d5;
+            border-radius: 12px;
+            padding: 26px;
+            margin: 16px 0;
+        }
+        .conclusion-box h3 {
+            color: #276749;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+        }
+        .conclusion-box h3 svg { width: 26px; height: 26px; }
+        .conclusion-box h3 svg path, .conclusion-box h3 svg circle, .conclusion-box h3 svg polyline { stroke: #276749; }
+        .priority-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid #c6f6d5;
+        }
+        .priority-item:last-child { border-bottom: none; }
+        .priority-num {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #276749;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .priority-text { font-size: 14px; color: #2d3748; line-height: 1.7; }
+        .priority-text strong { color: #1a2a3a; }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #1a2a3a 0%, #0d2540 100%);
+            border-radius: 14px;
+            padding: 32px;
+            margin-bottom: 24px;
+            text-align: center;
+            color: #fff;
+        }
+        .footer .footer-divider {
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #3584e4, transparent);
+            margin: 14px auto;
+        }
+        .footer .footer-text {
+            font-size: 13px;
+            color: #a0aec0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .footer .footer-text svg { width: 16px; height: 16px; }
+        .footer .footer-brand {
+            font-size: 18px;
+            font-weight: 800;
+            color: #3584e4;
+            margin-top: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .kpi-row { grid-template-columns: repeat(2, 1fr); }
+            .gap-list { grid-template-columns: 1fr; }
+            .method-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+
+        <!-- LOGO BAR -->
+        <div class="logo-bar">
+            <svg xmlns="http://www.w3.org/2000/svg" width="163" height="23" viewBox="0 0 163 23" fill="none">
+                <path d="M1 17.156V1.28H4.808V9.876L9.428 1.28H13.824L13.768 17.156H9.932V7.832L4.976 17.156H1Z" fill="#1a5fb4"/>
+                <path d="M16.4492 17.156V1.28H21.5452L24.4852 11.22L27.4532 1.28H32.3252V17.156H28.4892V8.336L25.9412 17.156H22.6932L20.0892 8.308V17.156H16.4492Z" fill="#1a5fb4"/>
+                <path d="M34.9609 17.156V1.28H48.0369V17.156H43.8649V4.892H39.1889V17.156H34.9609Z" fill="#1a5fb4"/>
+                <path d="M51.2443 21.58V18.192H53.0363C53.3909 18.192 53.6429 18.136 53.7923 18.024C53.9416 17.9307 54.0536 17.7627 54.1283 17.52L54.2122 17.156L49.3683 1.28H53.7082L56.3963 11.024L59.0563 1.28H63.2283L57.9922 18.388C57.6003 19.676 57.0309 20.5253 56.2842 20.936C55.5562 21.3653 54.4643 21.58 53.0083 21.58H51.2443Z" fill="#1a5fb4"/>
+                <path d="M63.3052 17.156V13.488H63.6133C64.1919 13.488 64.5559 13.3947 64.7052 13.208C64.8546 13.0213 64.9292 12.6107 64.9292 11.976V1.28H78.0052V17.156H73.8053V4.892H69.1572V12.536C69.1572 14.3093 68.8213 15.532 68.1493 16.204C67.4773 16.876 66.4132 17.212 64.9572 17.212C64.0426 17.212 63.4919 17.1933 63.3052 17.156Z" fill="#1a5fb4"/>
+                <path d="M80.709 17.156V1.28H84.993V5.144H87.961C90.145 5.144 91.6663 5.65733 92.525 6.684C93.4023 7.692 93.841 9.12933 93.841 10.996C93.841 12.9 93.393 14.4027 92.497 15.504C91.6197 16.6053 90.0517 17.156 87.793 17.156H80.709ZM84.993 13.74H87.205C88.0077 13.74 88.5863 13.544 88.941 13.152C89.3143 12.7413 89.501 12.0787 89.501 11.164C89.501 10.212 89.3237 9.54933 88.969 9.176C88.633 8.784 88.045 8.588 87.205 8.588H84.993V13.74Z" fill="#1a5fb4"/>
+                <path d="M102.123 17.38C99.5842 17.38 97.8389 16.708 96.8869 15.364C95.9349 14.02 95.4589 11.9573 95.4589 9.176C95.4589 7.81333 95.5522 6.66533 95.7389 5.732C95.9442 4.79867 96.2895 3.95867 96.7749 3.212C97.2789 2.46533 97.9882 1.91467 98.9029 1.56C99.8362 1.18667 100.994 1 102.375 1C104.13 1 105.595 1.28 106.771 1.84L104.923 5.508C104.214 5.13467 103.439 4.948 102.599 4.948C101.535 4.948 100.798 5.27467 100.387 5.928C99.9762 6.58133 99.7709 7.71067 99.7709 9.316C99.7709 10.9587 99.9762 12.1067 100.387 12.76C100.798 13.3947 101.563 13.712 102.683 13.712C103.448 13.712 104.335 13.4973 105.343 13.068L106.939 16.288C105.427 17.016 103.822 17.38 102.123 17.38Z" fill="#1a5fb4"/>
+                <path d="M108.794 17.156V14.16H111.37V17.156H108.794Z" fill="#1a5fb4"/>
+                <path d="M114.483 17.156V1.728H123.443V3.548H116.359V17.156H114.483Z" fill="#1a5fb4"/>
+                <path d="M125.617 21.58V19.872H126.905C127.334 19.872 127.651 19.788 127.857 19.62C128.081 19.452 128.258 19.1627 128.389 18.752L128.809 17.212L124.133 1.728H126.177L129.873 14.244L133.541 1.728H135.529L130.237 19.172C129.957 20.1053 129.565 20.74 129.061 21.076C128.557 21.412 127.819 21.58 126.849 21.58H125.617Z" fill="#1a5fb4"/>
+                <path d="M137.481 21.58V1.84L139.105 1.728L139.273 3.436C140.001 2.12933 141.597 1.476 144.061 1.476C144.938 1.476 145.694 1.62533 146.329 1.924C146.963 2.204 147.458 2.57733 147.813 3.044C148.186 3.492 148.475 4.08933 148.681 4.836C148.886 5.564 149.017 6.27333 149.073 6.964C149.129 7.636 149.157 8.448 149.157 9.4C149.157 10.352 149.119 11.1827 149.045 11.892C148.989 12.5827 148.858 13.292 148.653 14.02C148.447 14.748 148.158 15.3453 147.785 15.812C147.43 16.26 146.926 16.6333 146.273 16.932C145.638 17.212 144.882 17.352 144.005 17.352C142.717 17.352 141.737 17.212 141.065 16.932C140.393 16.6333 139.879 16.1853 139.525 15.588V21.58H137.481ZM143.501 15.532C144.266 15.532 144.891 15.392 145.377 15.112C145.881 14.8133 146.254 14.3747 146.497 13.796C146.739 13.1987 146.898 12.5733 146.973 11.92C147.066 11.2667 147.113 10.4547 147.113 9.484C147.113 8.51333 147.066 7.70133 146.973 7.048C146.898 6.39467 146.739 5.76933 146.497 5.172C146.273 4.57467 145.909 4.12667 145.405 3.828C144.901 3.52933 144.266 3.38 143.501 3.38C142.791 3.38 142.185 3.492 141.681 3.716C141.177 3.92133 140.785 4.192 140.505 4.528C140.225 4.84533 140.01 5.29333 139.861 5.872C139.711 6.45067 139.618 7.00133 139.581 7.524C139.543 8.028 139.525 8.68133 139.525 9.484C139.525 10.2867 139.543 10.9493 139.581 11.472C139.618 11.976 139.711 12.5173 139.861 13.096C140.01 13.656 140.225 14.0947 140.505 14.412C140.785 14.7293 141.167 15 141.653 15.224C142.157 15.4293 142.773 15.532 143.501 15.532Z" fill="#1a5fb4"/>
+                <path d="M151.675 21.58V19.872H152.963C153.393 19.872 153.71 19.788 153.915 19.62C154.139 19.452 154.317 19.1627 154.447 18.752L154.867 17.212L150.191 1.728H152.235L155.931 14.244L159.599 1.728H161.587L156.295 19.172C156.015 20.1053 155.623 20.74 155.119 21.076C154.615 21.412 153.878 21.58 152.907 21.58H151.675Z" fill="#1a5fb4"/>
+            </svg>
+            <span style="font-size:12px;color:#a0aec0;">Анализ ссылочной массы</span>
+        </div>
+
+        <!-- HEADER -->
+        <div class="header">
+            <h1>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                </svg>
+                Анализ ссылочной массы
+            </h1>
+            <div class="subtitle">Сравнительный анализ ссылочных профилей сайта LSR vs ключевых конкурентов на рынке новостроек Москвы и Санкт-Петербурга с фокусом на GEO (Generative Engine Optimization)</div>
+            <div class="date">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect>
+                    <line x1="16" x2="16" y1="2" y2="6"></line>
+                    <line x1="8" x2="8" y1="2" y2="6"></line>
+                    <line x1="3" x2="21" y1="10" y2="10"></line>
+                </svg>
+                Дата анализа: 29 мая 2026 г. &nbsp;|&nbsp; Источник данных: Ahrefs
+            </div>
+        </div>
+
+        <!-- 1. ЦЕЛЬ АНАЛИЗА -->
+        <div class="section">
+            <h2>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1a5fb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                Цель анализа
+            </h2>
+            <div class="goal-box">
+                <div class="goal-title">Задача</div>
+                <div class="text">
+                    Провести комплексный сравнительный анализ ссылочных профилей сайта <strong>www.lsr.ru</strong> и 4 ключевых конкурентов
+                    (<strong>ПИК (pik.ru), Эталон (etalongroup.ru), Самолёт (samolet.ru), СЕТЛ Груп (setlgroup.ru)</strong>)
+                    для выявления слабые стороны, где LSR отстаёт по количеству, качеству и типам referring domains,
+                    а также определить приоритеты для укрепления ссылочного профиля с учётом требований <strong>GEO (Generative Engine Optimization)</strong> —
+                   современного подхода к оптимизации, ориентированного на то, как AI-модели (ChatGPT, Perplexity, Gemini) «видят» и рекомендуют бренд.
+                </div>
+            </div>
+            <div class="text">
+                Анализ охватывает данные Ahrefs: выгрузки <strong>Referring Domains</strong> и <strong>Backlinks</strong>
+                для всех пяти сайтов. Ключевой фокус — не просто количественные показатели, а <strong>качество доменов</strong> (рейтинг домена),
+                <strong>принадлежность к типам платформ</strong> (СМИ, агрегаторы, форумы, обзорные сайты, государственные ресурсы) и
+                <strong>присутствие на площадках, которые индексируются и цитируются AI-моделями</strong> при формировании ответов
+                на запросы пользователей о рынке недвижимости.
+            </div>
+
+        </div>
+
+        <!-- 2. МЕТОДОЛОГИЯ -->
+        <div class="section">
+            <h2>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1a5fb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Методология
+            </h2>
+            <div class="method-grid">
+                <div class="method-card">
+                    <div class="method-num">01</div>
+                    <div class="method-title">Выгрузка данных из Ahrefs</div>
+                    <div class="method-desc">Получены полные выгрузки Referring Domains и Backlinks для 5 сайтов. Фильтрация: только dofollow и live-ссылки. Источник: Site Explorer → Referring Domains + Backlinks.</div>
+                </div>
+                <div class="method-card">
+                    <div class="method-num">02</div>
+                    <div class="method-title">Классификация платформ</div>
+                    <div class="method-desc">Каждый referring domain отнесён к категории: СМИ/новости, агрегаторы, форумы/сообщества, обзорные/рейтинговые, финансовые, государственные, отраслевые каталоги — по доменному имени и тематике.</div>
+                </div>
+                <div class="method-card">
+                    <div class="method-num">03</div>
+                    <div class="method-title">GEO-анализ</div>
+                    <div class="method-desc">Выявление площадок, которые AI-модели (ChatGPT, Perplexity, Gemini) используют как первичные источники для формирования ответов: крупные СМИ, Wikipedia, агрегаторы, обзорные ресурсы, форумы.</div>
+                </div>
+            </div>
+            <div class="text">
+                <strong>Конкуренты для сравнения:</strong>
+            </div>
+            <div class="text">
+                <strong>ПИК (pik.ru)</strong> — крупнейший застройщик России по объёму строительства. Агрессивный digital-маркетинг, широкое присутствие в СМИ. Выбран как основной бенчмарк по объёму ссылочного профиля.<br>
+                <strong>Эталон (etalongroup.ru)</strong> — топ-3 по объёву, активный PR, большое количество e-commerce ссылок.<br>
+                <strong>Самолёт (samolet.ru)</strong> — инновационный подход к маркетингу, активное присутствие на форумах и IT-платформах.<br>
+                <strong>СЕТЛ Груп (setlgroup.ru)</strong> — региональный лидер в СПб, но значительно меньший объём ссылочного профиля.
+            </div>
+        </div>
+
+        <!-- 3. KPI СВОДКА -->
+        <div class="section">
+            <h2>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1a5fb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                Ключевые показатели LSR
+            </h2>
+            <div class="text">Сводная карта основных метрик ссылочного профиля www.lsr.ru:</div>
+            <div class="kpi-row">
+                <div class="kpi-card warn">
+                    <div class="kpi-label">Referring Domains</div>
+                    <div class="kpi-value">851</div>
+                    <div class="kpi-sub">4-е место из 5</div>
+                </div>
+                <div class="kpi-card ok">
+                    <div class="kpi-label">DR средний</div>
+                    <div class="kpi-value">27.8</div>
+                    <div class="kpi-sub">1-е место</div>
+                </div>
+                <div class="kpi-card ok">
+                    <div class="kpi-label">DR медианный</div>
+                    <div class="kpi-value">26</div>
+                    <div class="kpi-sub">1-е место</div>
+                </div>
+                <div class="kpi-card warn">
+                    <div class="kpi-label">Доменов DR ≥ 70</div>
+                    <div class="kpi-value">53</div>
+                    <div class="kpi-sub">ПИК — 96, Самолёт — 86</div>
+                </div>
+                <div class="kpi-card caution">
+                    <div class="kpi-label">Доменов-СМИ</div>
+                    <div class="kpi-value">20</div>
+                    <div class="kpi-sub">Самолёт — 22</div>
+                </div>
+            </div>
+            <div class="insight-card">
+                <div class="insight-title">Краткий вывод</div>
+                <div class="insight-text">
+                    LSR имеет <strong>самое качественное ядро ссылочного профиля</strong> (лидер по среднему и медианному DR), нозначительно отстаёт по объёму (851 vs 1000+ у конкурентов) и количеству авторитетных доменов (53 vs 96 у ПИК). Это значит, что «ядро» профиля сильное, но нужно расширять охват.
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. СРАВНИТЕЛЬНАЯ ТАБЛИЦА -->
+        <div class="section">
+            <h2>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1a5fb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                Сравнительная таблица
+            </h2>
+            <div class="text">Полное сравнение ссылочных профилей по ключевым метрикам. Зелёным выделены лучшие показатели, красным — худшие:</div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:300px;">Метрика</th>
+                            <th>LSR</th>
+                            <th>ПИК</th>
+                            <th>Эталон</th>
+                            <th>Самолёт</th>
+                            <th>СЕТЛ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="row-lsr">
+                            <td>Ссылающиеся домены (всего)</td>
+                            <td class="worst">851</td>
+                            <td>1 008</td>
+                            <td class="best">1 037</td>
+                            <td>971</td>
+                            <td>310</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>DR средний</td>
+                            <td class="best">27.8</td>
+                            <td>25.8</td>
+                            <td class="worst">20.9</td>
+                            <td>25.5</td>
+                            <td>28.6</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>DR медианный</td>
+                            <td class="best">26</td>
+                            <td>16</td>
+                            <td class="worst">12</td>
+                            <td>16</td>
+                            <td>22</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Доменов с DR ≥ 70 (авторитетных)</td>
+                            <td class="middle">53</td>
+                            <td class="best">96</td>
+                            <td>47</td>
+                            <td class="best">86</td>
+                            <td>29</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Ссылки с авторитетных СМИ (кол-во)</td>
+                            <td>26</td>
+                            <td class="best">48</td>
+                            <td>27</td>
+                            <td>34</td>
+                            <td class="worst">11</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Брендовые анкоры (кол-во)</td>
+                            <td>277</td>
+                            <td class="best">653</td>
+                            <td>391</td>
+                            <td>453</td>
+                            <td>163</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Доля брендовых анкоров (%)</td>
+                            <td class="worst">36.7%</td>
+                            <td class="best">72.3%</td>
+                            <td>40.4%</td>
+                            <td>53.2%</td>
+                            <td>62.7%</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Упоминания на обзорных/рейтинговых сайтах</td>
+                            <td class="best">95 шт.</td>
+                            <td>85 шт.</td>
+                            <td>67 шт.</td>
+                            <td>79 шт.</td>
+                            <td>30 шт.</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Wikipedia (кол-во ссылок)</td>
+                            <td>6</td>
+                            <td class="best">12</td>
+                            <td>8</td>
+                            <td>3</td>
+                            <td>4</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Reddit</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Quora</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Отраслевые каталоги</td>
+                            <td>18</td>
+                            <td class="best">22</td>
+                            <td>12</td>
+                            <td>14</td>
+                            <td class="worst">8</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="insight-card" style="margin-top:16px;">
+                <div class="insight-title">Ключевые наблюдения по таблице</div>
+                <div class="insight-text">
+                    <strong>Сильные стороны LSR:</strong> Лидерство по DR средний (27.8) и медианный (26), а также по количеству упоминаний на обзорных/рейтинговых площадках (95). Это говорит о том, что ядро ссылочного профиля — качественное.<br><br>
+                    <strong>Слабые стороны LSR:</strong> Минимальная доля брендовых анкоров (36.7% vs 72.3% у ПИК) — это может свидетельствовать о недостаточной узнаваемости бренда. Также отставание по количеству доменов с высоким DR (53 vs 96 у ПИК) и СМИ-ссылок (26 vs 48 у ПИК).
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. РАСПРЕДЕЛЕНИЕ ПО ПЛАТФОРМАМ -->
+        <div class="section">
+            <h2>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1a5fb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="14" x="4" y="10" rx="2"></rect><path d="M2 21h20"></path><path d="M6 21V7"></path><path d="M18 21V7"></path><path d="M10 21v-4"></path><path d="M14 21v-4"></path></svg>
+                Распределение по типам платформ
+            </h2>
+            <div class="text">Каждый referring domain классифицирован по типу площадки. Это позволяет понять, какие каналы линкбилдинга активно используют конкуренты, а какие — недостаточны у LSR:</div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">Категория площадок</th>
+                            <th>LSR</th>
+                            <th>ПИК</th>
+                            <th>Эталон</th>
+                            <th>Самолёт</th>
+                            <th>СЕТЛ</th>
+                            <th style="text-align:left;max-width:200px;">Значение для GEO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="row-lsr">
+                            <td>СМИ / Новости</td>
+                            <td class="middle">18</td>
+                            <td>20</td>
+                            <td>16</td>
+                            <td class="best">22</td>
+                            <td>7</td>
+                            <td style="text-align:left;font-weight:400;font-size:12px;color:#718096;">Высшее. AI модели используют СМИ как первичные источники</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Агрегаторы / Площадки</td>
+                            <td class="best">14</td>
+                            <td>11</td>
+                            <td>10</td>
+                            <td>7</td>
+                            <td>3</td>
+                            <td style="text-align:left;font-weight:400;font-size:12px;color:#718096;">Важно. cian.ru, domclick — коммерческие запросы</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Форумы / Сообщества</td>
+                            <td>4</td>
+                            <td>6</td>
+                            <td>6</td>
+                            <td class="best">11</td>
+                            <td>2</td>
+                            <td style="text-align:left;font-weight:400;font-size:12px;color:#718096;">Важно. Мнения и обсуждения — источник для AI</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Финансовые</td>
+                            <td>5</td>
+                            <td>7</td>
+                            <td>4</td>
+                            <td class="best">8</td>
+                            <td>1</td>
+                            <td style="text-align:left;font-weight:400;font-size:12px;color:#718096;">Среднее. Подтверждает финансовую надёжность</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Государственные</td>
+                            <td>9</td>
+                            <td>1</td>
+                            <td>8</td>
+                            <td>5</td>
+                            <td class="best">9</td>
+                            <td style="text-align:left;font-weight:400;font-size:12px;color:#718096;">Среднее. Госустановы — подтверждение легитимности</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Обзорные / Рейтинги</td>
+                            <td>11</td>
+                            <td>8</td>
+                            <td>4</td>
+                            <td class="best">24</td>
+                            <td>5</td>
+                            <td style="text-align:left;font-weight:400;font-size:12px;color:#718096;">Высокое. Именно отсюда AI берёт рекомендации</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Отраслевые каталоги</td>
+                            <td>73</td>
+                            <td>76</td>
+                            <td class="best">77</td>
+                            <td>74</td>
+                            <td>7</td>
+                            <td style="text-align:left;font-weight:400;font-size:12px;color:#718096;">Базовое. Стандартная база для отрасли</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="text" style="margin-top:12px;">
+                <strong>Вывод:</strong> LSR лидирует по агрегаторам (14) и государственным площадкам (9), нозначительно отстаёт по форумам (4 vs 11 у Самолёта) и обзорным/рейтинговым сайтам (11 vs 24 у Самолёта). Именно эти две категории критичны для GEO, поскольку AI-модели активно анализируют форумы и обзоры при формировании рекомендаций.
+            </div>
+        </div>
+
+        <!-- 6. ПРОБЕЛЫ -->
+        <div class="section">
+            <h2>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                Где LSR отстаёт от конкурентов
+            </h2>
+            <div class="text">Визуализация объёма ссылочных доменов по сайтам:</div>
+            <h3>Общая масса ссылочных доменов</h3>
+            <div class="bar-chart">
+                <div class="bar-row">
+                    <div class="bar-label">Эталон</div>
+                    <div class="bar-track"><div class="bar-fill etalon" style="width:100%">1 037</div></div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-label">ПИК</div>
+                    <div class="bar-track"><div class="bar-fill pik" style="width:97%">1 008</div></div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-label">Самолёт</div>
+                    <div class="bar-track"><div class="bar-fill samolet" style="width:94%">971</div></div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-label"><strong style="color:#1a5fb4;">LSR</strong></div>
+                    <div class="bar-track"><div class="bar-fill lsr" style="width:82%">851</div></div>
+                </div>
+                <div class="bar-row">
+                    <div class="bar-label">СЕТЛ</div>
+                    <div class="bar-track"><div class="bar-fill setl" style="width:30%">310</div></div>
+                </div>
+            </div>
+
+            <h3 style="margin-top:24px;">Детализация слабые стороны</h3>
+            <div class="gap-list">
+                <div class="gap-item priority">
+                    <div class="gap-name">Авторитетные домены (DR ≥ 70): 53 vs 96 у ПИК</div>
+                    <div class="gap-desc">ПИК и Самолёт имеют почти вдвое больше доменов с высоким рейтингом. Высокий DR напрямую влияет на передачу ссылочного веса и позиции в выдаче.</div>
+                </div>
+                <div class="gap-item priority">
+                    <div class="gap-name">Брендовые анкоры: 36.7% vs 72.3% у ПИК</div>
+                    <div class="gap-desc">Наименьшая доля среди всех конкурентов. Поисковые системы и AI-модели воспринимают низкую долю брендовых анкоров как признак слабой узнаваемости бренда.</div>
+                </div>
+                <div class="gap-item">
+                    <div class="gap-name">СМИ-ссылки: 26 vs 48 у ПИК</div>
+                    <div class="gap-desc">ПИК имеет почти вдвое больше упоминаний на новостных площадках. Для GEO это критично — AI-модели именно СМИ считают наиболее надёжными источниками.</div>
+                </div>
+                <div class="gap-item">
+                    <div class="gap-name">Форумы/сообщества: 4 vs 11 у Самолёта</div>
+                    <div class="gap-desc">Самолёт активно представлен на форумах и в обсуждениях. AI-модели анализируют форумы для понимания реальных мнений пользователей.</div>
+                </div>
+                <div class="gap-item">
+                    <div class="gap-name">Wikipedia: 6 vs 12 у ПИК</div>
+                    <div class="gap-desc">Вikipedia — базовый источник для верификации фактов AI-моделями. ПИК имеет вдвое больше ссылок из этой энциклопедии.</div>
+                </div>
+                <div class="gap-item">
+                    <div class="gap-name">Reddit / Quora: 0 у ВСЕХ конкурентов</div>
+                    <div class="gap-desc">Ни один из пяти участников не представлен на Reddit/Quora. Это возможность для LSR стать первопроходцем и занять эту нишу раньше конкурентов.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. ТИПЫ ССЫЛОК -->
+        <div class="section">
+            <h2>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1a5fb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                Какие типы ссылок есть у конкурентов, но нет у LSR
+            </h2>
+            <div class="text">Это ключевые <strong>приоритеты</strong> для расширения ссылочного профиля LSR. Каждый пункт снабжён бейджем приоритета:</div>
+            <div class="gap-list">
+                <div class="gap-item priority">
+                    <div class="gap-name">Крупные СМИ: ria.ru, lenta.ru, meduza.io, iz.ru</div>
+                    <div class="gap-desc">ПИК и Самолёт присутствуют на крупнейших новостных площадках, которых нет в профиле LSR. Для AI-моделей СМИ — первичный источник фактов и упоминаний.</div>
+                    <br><span class="badge badge-red">КРИТИЧНО ДЛЯ GEO</span>
+                </div>
+                <div class="gap-item priority">
+                    <div class="gap-name">IT-платформы: habr.com, numerama.com</div>
+                    <div class="gap-desc">Технические и аналитические площадки, которые AI-модели активно индексируют. ПИК и Самолёт имеют ссылки отсюда — статьи о девелопменте и технологиях.</div>
+                    <br><span class="badge badge-red">ВЫСОКИЙ ПРИОРИТЕТ</span>
+                </div>
+                <div class="gap-item">
+                    <div class="gap-name">Финансовые порталы: tbank.ru, investing.com</div>
+                    <div class="gap-desc">Финансовые порталы формируют представление о надёжности и авторитетности бренда в глазах AI-моделей и инвесторов.</div>
+                    <br><span class="badge badge-yellow">СРЕДНИЙ ПРИОРИТЕТ</span>
+                </div>
+                <div class="gap-item">
+                    <div class="gap-name">Государственные площадки: mos.ru</div>
+                    <div class="gap-desc">Ссылки с официальных государственных ресурсов подтверждают легитимность и статус компании. ПИК и Эталон уже здесь представлены.</div>
+                    <br><span class="badge badge-yellow">СРЕДНИЙ ПРИОРИТЕТ</span>
+                </div>
+                <div class="gap-item">
+                    <div class="gap-name">Больше обзорных/рейтинговых площадок</div>
+                    <div class="gap-desc">Самолёт лидирует с 24 площадками (против 11 у LSR). Именно обзорные сайты AI-модели используют для формирования рекомендаций: «лучшие застройщики», «рейтинг новостроек».</div>
+                    <br><span class="badge badge-yellow">СРЕДНИЙ ПРИОРИТЕТ</span>
+                </div>
+                <div class="gap-item">
+                    <div class="gap-name">Форумы и комьюнити: pikabu, vc.ru, dzen.ru</div>
+                    <div class="gap-desc">У Самолёта 11 referring domains из этой категории — это обсуждения, мнения реальных покупателей. AI-модели активно используют such «человеческие» данные.</div>
+                    <br><span class="badge badge-blue">ВОЗМОЖНОСТЬ</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. GEO-АНАЛИЗ -->
+        <div class="section">
+            <h2>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1a5fb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2M7.5 13a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3m9 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3"></path></svg>
+                GEO-анализ: площадки, которые читают AI-модели
+            </h2>
+            <div class="text">
+                <strong>GEO</strong> — подход к продвижению, при котором оптимизируешься не только под поисковые системы (Google, Яндекс), но и под <strong>генеративные AI-модели</strong> (ChatGPT, Perplexity, Gemini), которые формируют ответы на основе проанализированных источников. Присутствие на определённых площадках напрямую влияет на то, упоминает ли AI ваш бренд в ответах.
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">Тип площадки</th>
+                            <th>Важность для AI</th>
+                            <th>LSR</th>
+                            <th>ПИК</th>
+                            <th>Эталон</th>
+                            <th>Самолёт</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="row-lsr">
+                            <td>Крупные СМИ (rbc, ria, lenta, kommersant)</td>
+                            <td><span class="badge badge-red">КРИТИЧНО</span></td>
+                            <td>rbc</td>
+                            <td>rbc, ria, lenta</td>
+                            <td>rbc, aif</td>
+                            <td class="best">rbc, ria, lenta, iz</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Агрегаторы (cian, domclick, novostroy-m)</td>
+                            <td><span class="badge badge-red">КРИТИЧНО</span></td>
+                            <td>novostroy-m</td>
+                            <td>cian</td>
+                            <td>cian</td>
+                            <td>cian</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Обзорные / Рейтинги (ratingruneta)</td>
+                            <td><span class="badge badge-yellow">ВАЖНО</span></td>
+                            <td class="best">95 упоминаний</td>
+                            <td>85</td>
+                            <td>67</td>
+                            <td>79</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Wikipedia</td>
+                            <td><span class="badge badge-yellow">ВАЖНО</span></td>
+                            <td>6</td>
+                            <td class="best">12</td>
+                            <td>8</td>
+                            <td>3</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Форумы / Обсуждения (vc, habr, pikabu)</td>
+                            <td><span class="badge badge-yellow">ВАЖНО</span></td>
+                            <td class="worst">4</td>
+                            <td>6</td>
+                            <td>6</td>
+                            <td class="best">11</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Reddit / Quora</td>
+                            <td><span class="badge badge-blue">ПОТЕНЦИАЛ</span></td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Отраслевые каталоги</td>
+                            <td><span class="badge badge-green">БАЗОВОЕ</span></td>
+                            <td>18</td>
+                            <td class="best">22</td>
+                            <td>12</td>
+                            <td>14</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="insight-card" style="margin-top:16px;">
+                <div class="insight-title">Ключевой инсайт для GEO-стратегии</div>
+                <div class="insight-text">
+                    ПИК и Самолёт лидируют по присутствию на площадках, которые AI-модели используют как первичные источники
+                    (ria.ru, lenta.ru, habr.com, iz.ru). LSR имеет хорошую базу на обзорных сайтах (95 упоминаний — лучший показатель),
+                    но <strong>критически отстаёт</strong> по присутствию на крупных СМИ и IT-платформах.<br><br>
+                    <strong>Стратегическая возможность:</strong> Reddit и Quora — белое пятно для всего рынка недвижимости.
+                    Ни один из пяти конкурентов не представлен на этих площадках. Первый игрок, который займет эту нишу,
+                    получит значительное преимущество в ответах AI-моделей.
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. ТИПЫ ПЛАТФОРМ -->
+        <div class="section">
+            <h2>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1a5fb4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                Типы CMS и технических платформ ссылочных доменов
+            </h2>
+            <div class="text">Анализ технических платформ (CMS), на которых размещены обратные ссылки. WordPress доминирует у всех конкурентов:</div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">Платформа</th>
+                            <th>LSR</th>
+                            <th>ПИК</th>
+                            <th>Эталон</th>
+                            <th>Самолёт</th>
+                            <th>СЕТЛ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="row-lsr">
+                            <td>WordPress</td>
+                            <td>292</td>
+                            <td>322</td>
+                            <td class="best">499</td>
+                            <td>352</td>
+                            <td>72</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>E-commerce + WordPress</td>
+                            <td>10</td>
+                            <td>13</td>
+                            <td class="best">80</td>
+                            <td>8</td>
+                            <td>2</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Форумы (message-boards)</td>
+                            <td class="best">6</td>
+                            <td>14</td>
+                            <td>11</td>
+                            <td>3</td>
+                            <td>2</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>Wiki</td>
+                            <td>1</td>
+                            <td class="best">2</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>1</td>
+                        </tr>
+                        <tr class="row-lsr">
+                            <td>CMS / Другие</td>
+                            <td>2</td>
+                            <td>2</td>
+                            <td class="best">4</td>
+                            <td>2</td>
+                            <td>1</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="text" style="margin-top:12px;">
+                <strong>Вывод:</strong> WordPress — доминирующая платформа (~80-90% ссылок) для всех анализируемых сайтов. Эталон значительно лидирует по e-commerce WordPress-площадкам (80 vs 10 у LSR), что говорит об активных партнёрских программах и интеграциях с интернет-магазинами. LSR имеет наименьшее количество ссылок с форумов — при этом Самолёт и ПИК значительно активнее представлены на этих площадках.
+            </div>
+        </div>
+
+        <!-- 10. ВЫВОДЫ -->
+        <div class="section">
+            <h2>
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#276749" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                Выводы и приоритетные действия
+            </h2>
+
+            <div class="insight-card">
+                <div class="insight-title">Общая оценка</div>
+                <div class="insight-text">
+                    LSR имеет <strong>самый качественный ссылочный профиль</strong> среди конкурентов (средний DR 27.8, медианный 26 — лучшие показатели), нозначительно отстаёт по <strong>объёму</strong> (851 RD vs 1000+ у трёх конкурентов) и <strong>разнообразию типов площадок</strong>. Критические пробелы: недостаток ссылок с крупных СМИ (ria.ru, lenta.ru), IT-платформ (habr.com) и низкая доля брендовых анкоров (36.7% vs 72.3% у ПИК). При этом LSR <strong>лидирует</strong> по обзорным и рейтинговым площадкам (95 упоминаний), что является сильной базой для GEO.
+                </div>
+            </div>
+
+            <div class="conclusion-box">
+                <h3>
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#276749" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                    Приоритетные действия (от высшего к низшему)
+                </h3>
+
+                <div class="priority-item">
+                    <div class="priority-num">1</div>
+                    <div class="priority-text">
+                        <strong>Увеличить присутствие на крупных СМИ:</strong> ria.ru, lenta.ru, kommersant.ru, iz.ru —
+                        приоритетные площадки для GEO. ПИК и Самолёт уже здесь, LSR — нет или минимально. Начать с PR-кампаний,
+                        спонсорских материалов и экспертных комментариев для деловых СМИ.
+                        <br><span class="badge badge-red">КРИТИЧНО</span>
+                    </div>
+                </div>
+
+                <div class="priority-item">
+                    <div class="priority-num">2</div>
+                    <div class="priority-text">
+                        <strong>Работа с IT-платформами:</strong> habr.com, vc.ru — площадки, которые AI-модели активно индексируют.
+                        Публикации о digital-трансформации девелопмента, умных городах, технологиях строительства.
+                        <br><span class="badge badge-red">КРИТИЧНО ДЛЯ GEO</span>
+                    </div>
+                </div>
+
+                <div class="priority-item">
+                    <div class="priority-num">3</div>
+                    <div class="priority-text">
+                        <strong>Увеличить долю брендовых анкоров:</strong> Текущие 36.7% — минимальный показатель среди конкурентов.
+                        Работать над узнаваемостью бренда: больше упоминаний «ГК ЛСР» / «ЛСР» в публикациях, контент-маркетинг,
+                        PR-кампании с фокусом на бренд.
+                        <br><span class="badge badge-red">КРИТИЧНО</span>
+                    </div>
+                </div>
+
+                <div class="priority-item">
+                    <div class="priority-num">4</div>
+                    <div class="priority-text">
+                        <strong>Расширить присутствие на форумах и в комьюнити:</strong> pikabu.ru, vc.ru, dzen.ru —
+                        Самолёт имеет 11 доменов из этой категории vs 4 у LSR. Форумы и обсуждения — источники «живых мнений»,
+                        которые AI-модели активно анализируют.
+                        <br><span class="badge badge-yellow">ВАЖНО</span>
+                    </div>
+                </div>
+
+                <div class="priority-item">
+                    <div class="priority-num">5</div>
+                    <div class="priority-text">
+                        <strong>Увеличить упоминания в Wikipedia:</strong> 6 vs 12 у ПИК. Wikipedia — базовый источник
+                        для верификации фактов AI-моделями. Создать и актуализировать статьи о компании, ключевых проектах,
+                        руководителях.
+                        <br><span class="badge badge-yellow">ВАЖНО</span>
+                    </div>
+                </div>
+
+                <div class="priority-item">
+                    <div class="priority-num">6</div>
+                    <div class="priority-text">
+                        <strong>Первопроходец на Reddit / Quora:</strong> Ни один конкурент не представлен на этих платформах.
+                        LSR может стать первым — создать профили, отвечать на вопросы о девелопменте, делиться экспертизой.
+                        Ранний вход даёт непропорционально большое преимущество в GEO.
+                        <br><span class="badge badge-blue">ВОЗМОЖНОСТЬ</span>
+                    </div>
+                </div>
+
+                <div class="priority-item">
+                    <div class="priority-num">7</div>
+                    <div class="priority-text">
+                        <strong>Увеличить количество ссылок с авторитетных СМИ (DR ≥ 70):</strong> 53 vs 96 у ПИК —
+                        почти двукратное отставание. Фокус не на количестве, а на качестве: одна ссылка с rbc.ru ценнее
+                        десятка с мелких каталогов.
+                        <br><span class="badge badge-yellow">ВАЖНО</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <div class="footer-divider"></div>
+            <div class="footer-text">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a0aec0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                Разработано командой
+            </div>
+            <div class="footer-brand">Импульс Гуру</div>
+        </div>
+
+    </div>
+</body>
+</html>
