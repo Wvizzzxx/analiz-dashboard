@@ -397,6 +397,49 @@
             letter-spacing: 0.5px;
         }
 
+        /* PDF Export Button */
+        .pdf-export-bar {
+            text-align: center;
+            margin: 24px 0;
+        }
+        .pdf-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(135deg, #1a5fb4 0%, #3584e4 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(26,95,180,0.3);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .pdf-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26,95,180,0.4);
+        }
+        .pdf-btn:active { transform: translateY(0); }
+        .pdf-btn:disabled {
+            opacity: 0.7;
+            cursor: wait;
+            transform: none;
+        }
+        .pdf-btn svg { flex-shrink: 0; }
+        .pdf-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         @media (max-width: 768px) {
             .kpi-row { grid-template-columns: repeat(2, 1fr); }
             .gap-list { grid-template-columns: 1fr; }
@@ -1123,6 +1166,18 @@
             </div>
         </div>
 
+        <!-- PDF EXPORT BUTTON -->
+        <div class="pdf-export-bar" id="pdfExportBar">
+            <button class="pdf-btn" id="pdfBtn" onclick="exportPDF()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Скачать PDF
+            </button>
+        </div>
+
         <!-- FOOTER -->
         <div class="footer">
             <div class="footer-divider"></div>
@@ -1136,5 +1191,36 @@
         </div>
 
     </div>
+
+    <!-- html2pdf.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        function exportPDF() {
+            var btn = document.getElementById('pdfBtn');
+            var bar = document.getElementById('pdfExportBar');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="pdf-spinner"></span> Генерация PDF...';
+
+            var element = document.querySelector('.container');
+
+            var opt = {
+                margin:       [10, 10, 10, 10],
+                filename:     'Анализ_ссылочной_массы_дашборд.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            html2pdf().set(opt).from(element).save().then(function() {
+                btn.disabled = false;
+                btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Скачать PDF';
+            }).catch(function(err) {
+                alert('Ошибка: ' + err);
+                btn.disabled = false;
+                btn.innerHTML = 'Скачать PDF';
+            });
+        }
+    </script>
 </body>
 </html>
