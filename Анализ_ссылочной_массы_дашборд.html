@@ -446,12 +446,28 @@
             .method-grid { grid-template-columns: 1fr; }
         }
 
-        /* PDF page break helpers */
-        .section { page-break-inside: avoid; }
-        .gap-list { page-break-inside: avoid; }
-        .table-wrapper { page-break-inside: avoid; }
-        .bar-chart { page-break-inside: avoid; }
-        .conclusion-box { page-break-inside: avoid; }
+        /* Print / PDF styles */
+        @media print {
+            body { background: #fff !important; padding: 0 !important; }
+            .container { max-width: 100% !important; }
+            .pdf-export-bar { display: none !important; }
+            .section { page-break-inside: avoid; border: 1px solid #e2e8f0 !important; box-shadow: none !important; }
+            .gap-list { page-break-inside: avoid; }
+            .table-wrapper { page-break-inside: avoid; overflow: visible !important; }
+            table { font-size: 11px !important; }
+            thead th, tbody td { padding: 8px 6px !important; }
+            .bar-chart { page-break-inside: avoid; }
+            .conclusion-box { page-break-inside: avoid; }
+            .header { page-break-after: avoid; }
+            .kpi-row { page-break-inside: avoid; }
+            .logo-bar { page-break-after: avoid; }
+            .footer { page-break-before: avoid; }
+            .insight-card { page-break-inside: avoid; }
+            .gap-item { page-break-inside: avoid; }
+            .method-card { page-break-inside: avoid; }
+            .priority-item { page-break-inside: avoid; }
+            @page { margin: 12mm; size: A4 portrait; }
+        }
     </style>
 </head>
 <body>
@@ -1203,41 +1219,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         function exportPDF() {
-            var btn = document.getElementById('pdfBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="pdf-spinner"></span> Generating PDF...';
-
-            var element = document.querySelector('.container');
-
-            // Temporarily set white background for PDF
-            var oldBg = document.body.style.background;
-            var oldBodyBg = window.getComputedStyle(document.body).backgroundColor;
-            document.body.style.background = '#ffffff';
-
-            var opt = {
-                margin:       [8, 8, 8, 8],
-                filename:     'Link_Analysis_Dashboard.pdf',
-                image:        { type: 'jpeg', quality: 0.95 },
-                html2canvas:  {
-                    scale: 1.5,
-                    useCORS: true,
-                    letterRendering: true,
-                    backgroundColor: '#ffffff',
-                    windowWidth: 1200
-                },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'], before: '.section' }
-            };
-
-            html2pdf().set(opt).from(element).save().then(function() {
-                document.body.style.background = oldBg;
-                btn.disabled = false;
-                btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PDF';
-            }).catch(function(err) {
-                document.body.style.background = oldBg;
-                btn.disabled = false;
-                btn.innerHTML = 'Download PDF';
-            });
+            window.print();
         }
     </script>
 </body>
